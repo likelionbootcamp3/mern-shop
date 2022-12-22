@@ -1,8 +1,14 @@
+import axios from "axios";
 import { useEffect } from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import useFetch from "../../hooks/useFetch";
 
-const ProductsFilter = () => {
+const ProductsFilter = ({ category, setCategory }) => {
+  const changeCategory = (e) => {
+    setCategory(e.target.value);
+  };
+
   return (
     <div className="mb-6">
       {/* Container */}
@@ -14,10 +20,14 @@ const ProductsFilter = () => {
             <label className="label">
               <span className="label-text">Category</span>
             </label>
-            <select className="select select-bordered" defaultValue="all">
+            <select
+              className="select select-bordered"
+              value={category}
+              onChange={changeCategory}
+            >
               <option value="all">All</option>
               <option value="smartphones">Smartphones</option>
-              <option value="laptops">Laptops</option>
+              <option value="laptop">Laptops</option>
             </select>
           </div>
         </div>
@@ -71,21 +81,20 @@ const ProductsGrid = ({ products }) => {
 };
 
 const Products = () => {
-  const [products, setProducts] = useState(null);
+  const [category, setCategory] = useState("all");
 
-  // fetch products
-  useEffect(() => {
-    fetch("http://localhost:4000/products")
-      .then((res) => res.json())
-      .then((data) => setProducts(data.products));
-  }, []);
+  const { data, isLoading } = useFetch(
+    `/products`,
+    category !== "all" && { category },
+    [category]
+  );
 
-  if (!products) return <div>Product is fetching...</div>;
+  if (isLoading) return <p>Fetching products...</p>;
 
   return (
     <div className="py-6">
-      <ProductsFilter />
-      <ProductsGrid products={products} />
+      <ProductsFilter category={category} setCategory={setCategory} />
+      <ProductsGrid products={data.products} />
     </div>
   );
 };

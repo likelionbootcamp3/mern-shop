@@ -5,7 +5,7 @@ const router = Router();
 
 // Get all products
 router.get("/", async (req, res) => {
-  const products = await Product.find({});
+  const products = await Product.find(req.query);
   res.json({ products: products, total: 100, skip: 0, limit: 30 });
 });
 
