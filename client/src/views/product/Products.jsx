@@ -1,8 +1,9 @@
-import axios from "axios";
-import { useEffect } from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import useFetch from "../../hooks/useFetch";
+import axios from "axios";
+import LazyLoad from "react-lazy-load";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import ProductsLoader from "./loaders/ProductsLoader";
 
 const ProductsFilter = ({ category, setCategory }) => {
   const changeCategory = (e) => {
@@ -39,11 +40,14 @@ const ProductsFilter = ({ category, setCategory }) => {
 const ProductsCard = ({ id, title, imageUrl, price, category }) => {
   return (
     <Link to={`/products/${id}`} className="block overflow-hidden group">
-      <img
-        src={imageUrl}
-        alt={title}
-        className="h-[180px] w-full object-cover transition duration-500 group-hover:scale-105"
-      />
+      <LazyLoad height={180} threshold={0.6}>
+        <img
+          src={imageUrl}
+          alt={title}
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+        />
+      </LazyLoad>
+
       <div className="relative pt-3 bg-white">
         <h3 className="text-sm text-gray-700 group-hover:underline group-hover:underline-offset-4">
           {title}
@@ -57,23 +61,27 @@ const ProductsCard = ({ id, title, imageUrl, price, category }) => {
   );
 };
 
-const ProductsGrid = ({ products }) => {
+const ProductsGrid = ({ products, isLoading }) => {
   return (
     <div>
       {/* Container */}
       <div className="max-w-screen-xl mx-auto px-4">
         {/* Layout */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {products.map((item) => (
-            <ProductsCard
-              key={item.id}
-              id={item.id}
-              title={item.title}
-              imageUrl={item.imageUrl}
-              price={item.price}
-              category={item.category}
-            />
-          ))}
+          {isLoading ? (
+            <ProductsLoader />
+          ) : (
+            products.map((item) => (
+              <ProductsCard
+                key={item.id}
+                id={item.id}
+                title={item.title}
+                imageUrl={item.imageUrl}
+                price={item.price}
+                category={item.category}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>
@@ -83,18 +91,21 @@ const ProductsGrid = ({ products }) => {
 const Products = () => {
   const [category, setCategory] = useState("all");
 
-  const { data, isLoading } = useFetch(
-    `/products`,
-    category !== "all" && { category },
-    [category]
-  );
+  const { data, isLoading } = useQuery({
+    queryKey: ["products", { category: category }],
+    queryFn: () => {
+      return axios.get("/products", {
+        params: category !== "all" && { category: category },
+      });
+    },
+  });
 
-  if (isLoading) return <p>Fetching products...</p>;
+  console.log(data);
 
   return (
     <div className="py-6">
       <ProductsFilter category={category} setCategory={setCategory} />
-      <ProductsGrid products={data.products} />
+      <ProductsGrid products={data?.data?.products} isLoading={isLoading} />
     </div>
   );
 };
