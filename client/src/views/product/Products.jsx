@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import LazyLoad from "react-lazy-load";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import ProductsLoader from "./loaders/ProductsLoader";
 
 const ProductsFilter = ({ category, setCategory }) => {
@@ -99,8 +99,6 @@ const Products = () => {
       });
     },
   });
-
-  console.log(data);
 
   return (
     <div className="py-6">

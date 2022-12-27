@@ -21,6 +21,14 @@ router.get("/categories", async (req, res) => {
   res.json(categories);
 });
 
+// Search product
+router.get("/search", async (req, res) => {
+  const products = await Product.find({
+    title: { $regex: req.query.q, $options: "i" },
+  });
+  res.json({ products: products, limit: 10, skip: 0 });
+});
+
 // Get product by id
 router.get("/:productId", async (req, res) => {
   const product = await Product.findById(req.params.productId);
