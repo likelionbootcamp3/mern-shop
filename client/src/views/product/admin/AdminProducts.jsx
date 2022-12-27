@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import GlobalSpinner from "../../../components/common/GlobalSpinner";
 import { EditIcon, TrashIcon } from "../../../components/common/icons";
+import useDebounce from "../../../hooks/useDebounce";
 
 const AdminProductsAction = ({ searchString, setSearchString }) => {
   return (
@@ -92,9 +93,10 @@ const AdminProductsTable = ({ data, isLoading }) => {
 
 const AdminProducts = () => {
   const [searchString, setSearchString] = useState("");
+  const debouncedSearch = useDebounce(searchString, 500);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["products", { q: searchString }],
+    queryKey: ["products", { q: debouncedSearch }],
     queryFn: () =>
       axios.get("/products/search", { params: { q: searchString } }),
   });

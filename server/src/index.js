@@ -14,6 +14,13 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// Delay 500ms
+app.use((req, res, next) => {
+  setTimeout(() => {
+    next();
+  }, 500);
+});
+
 // Routes
 app.use("/products", productRoute);
 app.get("/", (req, res) => {
