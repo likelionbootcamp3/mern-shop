@@ -1,10 +1,33 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import FormRow from "../../../components/common/FormRow";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const AdminProductsNew = () => {
   const { register, handleSubmit } = useForm();
-  const onSubmit = (data) => {};
+  const mutation = useMutation({
+    mutationFn: (newProduct) => {
+      return axios.post("/products/add", newProduct);
+    },
+    onSuccess: () => {
+      toast.success("Succesfully add product!", {
+        position: "bottom-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: false,
+        draggable: false,
+        progress: undefined,
+        theme: "light",
+      });
+    },
+  });
+
+  const onSubmit = (data) => {
+    // console.log(data)
+    mutation.mutate(data);
+  };
 
   return (
     <div>
@@ -56,7 +79,7 @@ const AdminProductsNew = () => {
                   type="text"
                   placeholder="Type here"
                   className="input input-bordered w-full"
-                  {...register("imageURl")}
+                  {...register("imageUrl")}
                 />
               </FormRow>
 
