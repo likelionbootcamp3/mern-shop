@@ -3,14 +3,39 @@ import FormRow from "../../../components/common/FormRow";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Loader from "../../../components/common/Loader";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import FormRowError from "../../../components/common/FormRowError";
+
+const schema = yup
+  .object({
+    title: yup.string().required(),
+    catgory: yup
+      .string()
+      .oneOf(["smartphones", "laptop"], "Select a catgory")
+      .required(),
+    price: yup.number().required().typeError("Must be a number"),
+    imageUrl: yup.string().url().required(),
+    description: yup.string().required(),
+  })
+  .required();
 
 const AdminProductsNew = () => {
-  const { register, handleSubmit } = useForm();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
   const mutation = useMutation({
     mutationFn: (newProduct) => {
       return axios.post("/products/add", newProduct);
     },
     onSuccess: () => {
+      reset();
       toast.success("Succesfully add product!", {
         position: "bottom-right",
         autoClose: 3000,
@@ -23,6 +48,8 @@ const AdminProductsNew = () => {
       });
     },
   });
+
+  console.log(errors);
 
   const onSubmit = (data) => {
     // console.log(data)
@@ -46,6 +73,7 @@ const AdminProductsNew = () => {
                   className="input input-bordered w-full"
                   {...register("title")}
                 />
+                <FormRowError error={errors.title} />
               </FormRow>
 
               {/* Category */}
@@ -61,6 +89,7 @@ const AdminProductsNew = () => {
                   <option value="smartphones">Smartphones</option>
                   <option value="laptop">Laptop</option>
                 </select>
+                <FormRowError error={errors.category} />
               </FormRow>
 
               {/* Price */}
@@ -71,6 +100,7 @@ const AdminProductsNew = () => {
                   className="input input-bordered w-full"
                   {...register("price")}
                 />
+                <FormRowError error={errors.price} />
               </FormRow>
 
               {/* ImageURl */}
@@ -81,6 +111,7 @@ const AdminProductsNew = () => {
                   className="input input-bordered w-full"
                   {...register("imageUrl")}
                 />
+                <FormRowError error={errors.imageUrl} />
               </FormRow>
 
               {/* Description */}
@@ -90,12 +121,20 @@ const AdminProductsNew = () => {
                   placeholder="Write something here..."
                   {...register("description")}
                 ></textarea>
+                <FormRowError error={errors.description} />
               </FormRow>
             </div>
 
             {/* Submit Button */}
-            <button type="submit" className="btn btn-primary">
-              Add Product
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={mutation.isLoading}
+            >
+              <div className="flex items-center gap-2">
+                {mutation.isLoading && <Loader />}
+                <span>Add Product</span>
+              </div>
             </button>
           </form>
         </div>
