@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
-import Navbar from "../common/Navbar";
 import { ToastContainer } from "react-toastify";
+import Navbar from "../common/Navbar";
 
 const RootLayout = () => {
   return (
@@ -9,7 +9,18 @@ const RootLayout = () => {
       <main>
         <Outlet />
       </main>
-      <ToastContainer />
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss={false}
+        draggable={false}
+        pauseOnHover={false}
+        theme="light"
+      />
     </div>
   );
 };

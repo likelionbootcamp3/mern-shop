@@ -1,10 +1,75 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import GlobalSpinner from "../../../components/common/GlobalSpinner";
 import { EditIcon, TrashIcon } from "../../../components/common/icons";
+import Loader from "../../../components/common/Loader";
 import useDebounce from "../../../hooks/useDebounce";
+
+const DeleteProductModal = ({ id }) => {
+  const queryClient = useQueryClient();
+  const ref = useRef();
+
+  const mutation = useMutation({
+    mutationFn: (productId) => {
+      return axios.delete(`/products/${productId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      ref.current.checked = false;
+    },
+  });
+
+  return (
+    <div>
+      <input type="checkbox" ref={ref} id={id} className="modal-toggle" />
+      <label htmlFor={id} className="modal cursor-pointer">
+        <label className="modal-box relative" htmlFor="">
+          <div className="text-center">
+            {/* Warning Icon */}
+            <svg
+              aria-hidden="true"
+              className="mx-auto mb-4 text-gray-400 w-14 h-14 dark:text-gray-200"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+
+            {/* Title */}
+            <h3 className="mb-6 text-lg font-normal text-gray-500 dark:text-gray-400">
+              Are you sure you want to delete this product?
+            </h3>
+
+            {/* Action Buttons */}
+            <div className="flex justify-center gap-4">
+              <button
+                className="btn btn-error text-white"
+                onClick={() => mutation.mutate(id)}
+              >
+                <div className="flex items-center gap-2">
+                  {mutation.isLoading && <Loader />}
+                  <span>Yes, I'm sure</span>
+                </div>
+              </button>
+              <label htmlFor={id} className="btn btn-outline">
+                No, cancel
+              </label>
+            </div>
+          </div>
+        </label>
+      </label>
+    </div>
+  );
+};
 
 const AdminProductsAction = ({ searchString, setSearchString }) => {
   return (
@@ -24,6 +89,8 @@ const AdminProductsAction = ({ searchString, setSearchString }) => {
 };
 
 const AdminProductsTable = ({ data, isLoading }) => {
+  const [id, setId] = useState(null);
+
   if (isLoading) return <GlobalSpinner />;
 
   const {
@@ -32,6 +99,7 @@ const AdminProductsTable = ({ data, isLoading }) => {
 
   return (
     <div className="overflow-x-auto w-full">
+      {/* Table */}
       <table className="table w-full">
         {/* Header */}
         <thead>
@@ -77,9 +145,13 @@ const AdminProductsTable = ({ data, isLoading }) => {
 
                   {/* Delete Button */}
                   <div className="tooltip" data-tip="Delete">
-                    <button className="btn btn-sm btn-square btn-error hover:opacity-90">
+                    <label
+                      htmlFor={item.id}
+                      className="btn btn-sm btn-square btn-error hover:opacity-90"
+                      onClick={() => setId(item.id)}
+                    >
                       <TrashIcon />
-                    </button>
+                    </label>
                   </div>
                 </div>
               </th>
@@ -87,6 +159,9 @@ const AdminProductsTable = ({ data, isLoading }) => {
           ))}
         </tbody>
       </table>
+
+      {/* Modal */}
+      <DeleteProductModal id={id} />
     </div>
   );
 };

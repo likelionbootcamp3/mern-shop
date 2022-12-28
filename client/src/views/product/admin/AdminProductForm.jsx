@@ -1,82 +1,21 @@
-import { useForm } from "react-hook-form";
 import FormRow from "../../../components/common/FormRow";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
-import Loader from "../../../components/common/Loader";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import FormRowError from "../../../components/common/FormRowError";
-import { useNavigate, useParams } from "react-router-dom";
-import GlobalSpinner from "../../../components/common/GlobalSpinner";
-import { useEffect } from "react";
-import AdminProductForm from "./AdminProductForm";
+import Loader from "../../../components/common/Loader";
 
-const schema = yup
-  .object({
-    title: yup.string().required(),
-    category: yup.string().oneOf(["smartphones", "laptop"], "Select a catgory"),
-    price: yup.number().positive().required().typeError("Must be a number"),
-    imageUrl: yup.string().url().required(),
-    description: yup.string().required(),
-  })
-  .required();
-
-const AdminProductsEdit = () => {
-  const { productId } = useParams();
-  const navigate = useNavigate();
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["products", productId],
-    queryFn: () => axios.get(`products/${productId}`),
-  });
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm({
-    resolver: yupResolver(schema),
-  });
-
-  useEffect(() => {
-    reset(data?.data);
-  }, [data]);
-
-  const mutation = useMutation({
-    mutationFn: (newProduct) => {
-      return axios.put(`/products/${productId}`, newProduct);
-    },
-    onSuccess: () => {
-      navigate("/admin/products");
-      toast.success("Succesfully add product!");
-    },
-  });
-
-  const onSubmit = (data) => {
-    mutation.mutate(data);
-  };
-
-  if (isLoading) return <GlobalSpinner />;
-
-  return (
-    <AdminProductForm
-      onSubmit={handleSubmit(onSubmit)}
-      register={register}
-      isLoading={mutation.isLoading}
-      errors={errors}
-      btnLabel="Save Product"
-    />
-  );
-
+const AdminProductForm = ({
+  onSubmit,
+  register,
+  errors,
+  isLoading,
+  btnLabel,
+}) => {
   return (
     <div>
       {/* Container */}
       <div className="max-w-screen-md mx-auto px-4">
         {/* Layout */}
         <div className="py-6">
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={onSubmit}>
             {/* Fields */}
             <div className="grid grid-cols-2 gap-4 mb-6">
               {/* Title */}
@@ -147,11 +86,11 @@ const AdminProductsEdit = () => {
             <button
               type="submit"
               className="btn btn-primary"
-              disabled={mutation.isLoading}
+              disabled={isLoading}
             >
               <div className="flex items-center gap-2">
-                {mutation.isLoading && <Loader />}
-                <span>Save</span>
+                {isLoading && <Loader />}
+                <span>{btnLabel}</span>
               </div>
             </button>
           </form>
@@ -161,4 +100,4 @@ const AdminProductsEdit = () => {
   );
 };
 
-export default AdminProductsEdit;
+export default AdminProductForm;
