@@ -1,16 +1,10 @@
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import GlobalSpinner from "../../components/common/GlobalSpinner";
+import useProduct from "../../hooks/products/useProduct";
 
 const ProductDetail = () => {
   const { productId } = useParams();
-  const { data, isLoading } = useQuery({
-    queryKey: ["products", productId],
-    queryFn: () => {
-      return axios.get(`/products/${productId}`);
-    },
-  });
+  const { data, isLoading } = useProduct(productId);
 
   if (isLoading) return <GlobalSpinner />;
 

@@ -1,23 +1,10 @@
 import { useForm } from "react-hook-form";
-import FormRow from "../../../components/common/FormRow";
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
 import { toast } from "react-toastify";
-import Loader from "../../../components/common/Loader";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import FormRowError from "../../../components/common/FormRowError";
 import AdminProductForm from "./AdminProductForm";
-
-const schema = yup
-  .object({
-    title: yup.string().required(),
-    category: yup.string().oneOf(["smartphones", "laptop"], "Select a catgory"),
-    price: yup.number().positive().required().typeError("Must be a number"),
-    imageUrl: yup.string().url().required(),
-    description: yup.string().required(),
-  })
-  .required();
+import { productSchema } from "../../../validation/productSchema";
+import { createProduct } from "../../../services/productService";
 
 const AdminProductsNew = () => {
   const {
@@ -26,25 +13,20 @@ const AdminProductsNew = () => {
     reset,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(schema),
-  });
-  const mutation = useMutation({
-    mutationFn: (newProduct) => {
-      return axios.post("/products/add", newProduct);
-    },
-    onSuccess: () => {
-      reset();
-      toast.success("Succesfully add product!");
-    },
+    resolver: yupResolver(productSchema),
   });
 
-  const onSubmit = (data) => {
-    mutation.mutate(data);
-  };
+  const mutation = useMutation({
+    mutationFn: (newProduct) => createProduct(newProduct),
+    onSuccess: () => {
+      reset();
+      toast.success("Successfully created new product");
+    },
+  });
 
   return (
     <AdminProductForm
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit((data) => mutation.mutate(data))}
       register={register}
       isLoading={mutation.isLoading}
       errors={errors}

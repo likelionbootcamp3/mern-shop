@@ -8,6 +8,7 @@ const AdminProductForm = ({
   errors,
   isLoading,
   btnLabel,
+  isDirty = true,
 }) => {
   return (
     <div>
@@ -86,7 +87,7 @@ const AdminProductForm = ({
             <button
               type="submit"
               className="btn btn-primary"
-              disabled={isLoading}
+              disabled={isLoading || !isDirty}
             >
               <div className="flex items-center gap-2">
                 {isLoading && <Loader />}

@@ -1,20 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import GlobalSpinner from "../../../components/common/GlobalSpinner";
 import { EditIcon, TrashIcon } from "../../../components/common/icons";
 import Loader from "../../../components/common/Loader";
-import useDebounce from "../../../hooks/useDebounce";
+import useSearchProducts from "../../../hooks/products/useSearchProducts";
+import { deleteProductById } from "../../../services/productService";
 
 const DeleteProductModal = ({ id }) => {
   const queryClient = useQueryClient();
   const ref = useRef();
 
   const mutation = useMutation({
-    mutationFn: (productId) => {
-      return axios.delete(`/products/${productId}`);
-    },
+    mutationFn: (productId) => deleteProductById(productId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       ref.current.checked = false;
@@ -168,13 +166,7 @@ const AdminProductsTable = ({ data, isLoading }) => {
 
 const AdminProducts = () => {
   const [searchString, setSearchString] = useState("");
-  const debouncedSearch = useDebounce(searchString, 500);
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["products", { q: debouncedSearch }],
-    queryFn: () =>
-      axios.get("/products/search", { params: { q: searchString } }),
-  });
+  const { data, isLoading } = useSearchProducts(searchString);
 
   return (
     <div>
