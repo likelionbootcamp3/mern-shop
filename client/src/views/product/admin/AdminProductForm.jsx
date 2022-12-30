@@ -3,6 +3,7 @@ import FormRowError from "../../../components/common/FormRowError";
 import Loader from "../../../components/common/Loader";
 
 const AdminProductForm = ({
+  watch,
   onSubmit,
   register,
   errors,
@@ -61,15 +62,23 @@ const AdminProductForm = ({
                 <FormRowError error={errors.price} />
               </FormRow>
 
-              {/* ImageURl */}
-              <FormRow label="Image Url" className="col-span-full">
+              {/* Image */}
+              <FormRow label="Image">
                 <input
-                  type="text"
-                  placeholder="Type here"
-                  className="input input-bordered w-full"
-                  {...register("imageUrl")}
+                  type="file"
+                  className="file-input file-input-bordered w-full"
+                  {...register("image")}
                 />
-                <FormRowError error={errors.imageUrl} />
+
+                {/* Preview Image */}
+                {watch("imageUrl") && (
+                  <img
+                    className="mt-4"
+                    src={watch("imageUrl")}
+                    alt={watch("title")}
+                  />
+                )}
+                <FormRowError error={errors.image} />
               </FormRow>
 
               {/* Description */}

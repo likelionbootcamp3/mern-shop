@@ -16,10 +16,11 @@ const AdminProductsEdit = () => {
   // Fetch product by id
   const { data, isLoading } = useProduct(productId);
   const {
+    watch,
     register,
     handleSubmit,
     reset,
-    formState: { errors, isDirty },
+    formState: { errors, isDirty, dirtyFields },
   } = useForm({
     resolver: yupResolver(productSchema),
   });
@@ -38,11 +39,16 @@ const AdminProductsEdit = () => {
     },
   });
 
+  const onSubmit = (data) => {
+    mutation.mutate(data);
+  };
+
   if (isLoading) return <GlobalSpinner />;
 
   return (
     <AdminProductForm
-      onSubmit={handleSubmit((data) => mutation.mutate(data))}
+      watch={watch}
+      onSubmit={handleSubmit(onSubmit)}
       register={register}
       isLoading={mutation.isLoading}
       errors={errors}

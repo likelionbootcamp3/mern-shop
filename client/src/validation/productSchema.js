@@ -5,7 +5,7 @@ export const productSchema = yup
     title: yup.string().required(),
     category: yup.string().oneOf(["smartphones", "laptop"], "Select a catgory"),
     price: yup.number().positive().required().typeError("Must be a number"),
-    imageUrl: yup.string().url().required(),
+    image: yup.mixed(),
     description: yup.string().required(),
   })
   .required();
